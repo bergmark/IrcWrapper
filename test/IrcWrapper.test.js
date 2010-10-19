@@ -108,7 +108,7 @@ module.exports = {
     // Listen for parts.
     var hash = null;
     iw._onpart({
-        channel : "#partchan",
+      channel : "#partchan",
       callback : function (h) {
         hash = h;
       }
@@ -234,5 +234,36 @@ module.exports = {
 
     irc.nick(mehash, 'newnick');
     assert.eql('newnick', iw.getMe().getNick());
+
+    // Client quit should not trigger Quit event.
+    var quitTriggered = false;
+    iw._onquit({
+      callback : function () {
+        quitTriggered = true;
+      }
+    });
+    var clientQuitTriggered = false;
+    iw._onclientquit({
+      callback : function () {
+        assert.strictEqual(iw, this);
+        clientQuitTriggered = true;
+      }
+    });
+    irc.clientQuit(mehash);
+    assert.ok(!quitTriggered);
+    assert.ok(clientQuitTriggered);
+
+    // Events should be called in the scope of the IrcWrapper.
+    iw._onjoin({
+      callback : function () {
+        assert.ok(iw === this);
+      }
+    });
+    irc.join("#foo", mehash);
+    // And for dynamically attached raws (no _onx method).
+    iw._addListener("001", function () {
+      assert.ok(iw === this);
+    });
+    irc.send001(mehash.nick);
   }
 };

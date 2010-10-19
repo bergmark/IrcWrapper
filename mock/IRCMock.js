@@ -66,6 +66,13 @@ Class('IRCMock', {
         params : [location, "Quit message!"]
       });
     },
+    clientQuit : function (person) {
+      this.sendRaw("quit", {
+        person : person,
+        command : "QUIT",
+        params : ["Client Quit"]
+      });
+    },
     nick : function (person, newNick) {
       this.sendRaw("nick", {
         person : person,
