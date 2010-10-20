@@ -5,12 +5,52 @@ Class('IRCMock', {
     listeners : {
       is : "ro",
       init : function () { return []; }
+    },
+    serverListeners : {
+      init : function () { return {}; }
     }
   },
   methods : {
+    initialize : function (args) {
+      if (IRCMock.serverListeners) {
+        for (var i= 0; i < IRCMock.serverListeners.length; i++) {
+          var v = IRCMock.serverListeners[i];
+          this.addServerListener(v.raw, v.callback);
+        }
+      }
+      this.nick(args.nick);
+      delete IRCMock.serverListeners;
+    },
+    addServerListener : function (raw, callback) {
+      this.serverListeners[raw] = this.serverListeners[raw] || [];
+      this.serverListeners[raw].push(callback);
+    },
+    _onServerGet : function (raw, params) {
+      this.serverListeners[raw] = this.serverListeners[raw] || [];
+      for (var i = 0; i < this.serverListeners[raw].length; i++) {
+        this.serverListeners[raw][i](params);
+      }
+    },
+
+    // Client to server.
     connect : function () {
 
     },
+    privmsg : function (location, message) {
+      this._onServerGet("privmsg", { location : location, message : message});
+    },
+    join : function (channel, password) {
+      console.log("join", channel);
+      this._onServerGet("join", { location : channel, password : password });
+    },
+    nick : function (newNick) {
+      this._onServerGet("nick", { newNick : newNick });
+    },
+    quit : function (message) {
+      this._onServerGet("quit", { message : message });
+    },
+
+    // Server to client.
     addListener : function (raw, callback) {
       this.listeners.push({
         raw : raw,
@@ -25,12 +65,20 @@ Class('IRCMock', {
           }
       }
     },
+    // Nick already taken.
+    send433 : function (serverName, nick) {
+      this.sendRaw("433", {
+        servername : serverName,
+        command : "433",
+        params : ["*", nick, "Nickname is already in use."]
+      });
+    },
     send001 : function (nick) {
       this.sendRaw("001", {
         params : [nick, "Welcome message!"]
       });
     },
-    privmsg : function (location, message, person) {
+    sendPrivmsg : function (location, message, person) {
       if (person === undefined) {
         throw new Error("privmsg: need to specify person.");
       }
@@ -39,7 +87,7 @@ Class('IRCMock', {
         params : [location, message]
       });
     },
-    join : function (location, person) {
+    sendJoin : function (location, person) {
       if (person === undefined) {
         throw new Error("join: need to specify person.");
       }
@@ -48,7 +96,7 @@ Class('IRCMock', {
         params : [location]
       });
     },
-    part : function (location, person) {
+    sendPart : function (location, person) {
       if (person === undefined) {
         throw new Error("part: need to specify person.");
       }
@@ -57,7 +105,7 @@ Class('IRCMock', {
         params : [location]
       });
     },
-    quit : function (location, person) {
+    sendQuit : function (location, person) {
       if (person === undefined) {
         throw new Error("part: need to specify person.");
       }
@@ -66,14 +114,14 @@ Class('IRCMock', {
         params : [location, "Quit message!"]
       });
     },
-    clientQuit : function (person) {
+    sendClientQuit : function (person) {
       this.sendRaw("quit", {
         person : person,
         command : "QUIT",
         params : ["Client Quit"]
       });
     },
-    nick : function (person, newNick) {
+    sendNick : function (person, newNick) {
       this.sendRaw("nick", {
         person : person,
         command : 'NICK',

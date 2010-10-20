@@ -15,7 +15,7 @@ module.exports = {
       var iw = new IrcWrapper({
         IRC : IRCMock,
         server : "irc.vassius.se",
-        nick : "mediabot2",
+        nicks : ["mediabot2"],
         joinChannels : ["#c-test"],
         bindings : {
           privmsg : [{
@@ -58,41 +58,41 @@ module.exports = {
       });
 
     // Match message.
-    var ircMock = iw.getIrc();
-    ircMock.privmsg("#chan", "msg", person);
+    var irc = iw.getIrc();
+    irc.sendPrivmsg("#chan", "msg", person);
     assert.eql(1, triggers);
-    ircMock.privmsg("#chan", "msg2", person);
+    irc.sendPrivmsg("#chan", "msg2", person);
     assert.eql(1, triggers);
 
     assert.eql(null, msg3Msg);
-    ircMock.privmsg("#chan", "msg3", person);
+    irc.sendPrivmsg("#chan", "msg3", person);
     assert.eql("msg3", msg3Msg);
 
     // Match message with regex.
     assert.eql(null, fooTestHash);
-    ircMock.privmsg("#chan", "foo", person);
+    irc.sendPrivmsg("#chan", "foo", person);
     assert.eql("foo", fooTestHash.message);
-    ircMock.privmsg("#chan", "bar foo baz", person);
+    irc.sendPrivmsg("#chan", "bar foo baz", person);
     assert.eql("bar foo baz", fooTestHash.message);
     assert.eql("foo", fooTestHash.regExp[1]);
     assert.ok(!(2 in fooTestHash.regExp));
 
     // Match with location.
     assert.isNull(locationHash);
-    ircMock.privmsg("#chan2", "some msg", person);
+    irc.sendPrivmsg("#chan2", "some msg", person);
     assert.eql("#chan2", locationHash.location);
     assert.eql("some msg", locationHash.message);
 
     assert.isUndefined(hashes.x);
-    ircMock.privmsg("#chanx", "msgx msgx msgx", person); // messageString not matching
+    irc.sendPrivmsg("#chanx", "msgx msgx msgx", person); // messageString not matching
     assert.isUndefined(hashes.x);
-    ircMock.privmsg("#chanxx", "msgx", person); // location not matching
+    irc.sendPrivmsg("#chanxx", "msgx", person); // location not matching
     assert.isUndefined(hashes.x);
-    ircMock.privmsg("#chanx", "msgx", person);
+    irc.sendPrivmsg("#chanx", "msgx", person);
     assert.isDefined(hashes.x);
 
     // Listen for joins.
-    ircMock.join("#joinchan", person);
+    irc.sendJoin("#joinchan", person);
     assert.isDefined(hashes.join);
     assert.eql("#joinchan", hashes.join.location);
 
@@ -102,7 +102,7 @@ module.exports = {
     iw._addListener("arbitrary", function () {
       triggered = true;
     });
-    ircMock.sendRaw("arbitrary");
+    irc.sendRaw("arbitrary");
     assert.ok(triggered);
 
     // Listen for parts.
@@ -113,8 +113,8 @@ module.exports = {
         hash = h;
       }
     });
-    ircMock.join("#partchan", person);
-    ircMock.part("#partchan", person);
+    irc.sendJoin("#partchan", person);
+    irc.sendPart("#partchan", person);
     assert.eql("#partchan", hash.location);
   },
   "admin privileges" : function (assert) {
@@ -136,13 +136,13 @@ module.exports = {
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
-      nick : mehash.nick,
+      nicks : [mehash.nick],
       joinChannels : ["#chan"],
       admins : ["menick!meuser@mehost"]
     });
-    var mock = iw.getIrc();
-    mock.join("#chan", mehash);
-    mock.join("#chan", otherhash);
+    var irc = iw.getIrc();
+    irc.sendJoin("#chan", mehash);
+    irc.sendJoin("#chan", otherhash);
     var me = iw.getPerson(mehash.nick);
     assert.ok(iw.isAdmin(me));
     //assert.ok(!iw.isAdmin(iw.getPerson(otherhash.nick)));
@@ -171,17 +171,17 @@ module.exports = {
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
-      nick : mehash.nick,
+      nicks : [mehash.nick],
       joinChannels : ["#my-join-chan"]
     });
     var irc = iw.getIrc();
     irc.send001(mehash.nick);
 
     // Join a channel and assert that IrcWrapper knows about it.
-    irc.join("#my-join-chan", mehash);
+    irc.sendJoin("#my-join-chan", mehash);
     var chan = iw.getChannel('#my-join-chan');
     assert.eql("#my-join-chan", chan.getName());
-    irc.join("#my-join-chan", otherhash);
+    irc.sendJoin("#my-join-chan", otherhash);
     // Don't create several instances.
     assert.strictEqual(chan, iw.getChannel('#my-join-chan'));
 
@@ -192,7 +192,7 @@ module.exports = {
     var me = iw.getPerson('me');
     var other = iw.getPerson('other');
     assert.ok(me !== other);
-    irc.join('#chan2', mehash);
+    irc.sendJoin('#chan2', mehash);
     var chan2 = iw.getChannel('#chan2');
     assert.ok(iw.getChannel('#chan2').hasPerson(me));
     assert.strictEqual(me, iw.getPerson('me'));
@@ -202,7 +202,7 @@ module.exports = {
     assert.ok(!other.isInChannel(chan2));
     assert.ok(!chan2.hasPerson(other));
 
-    irc.part('#my-join-chan', other);
+    irc.sendPart('#my-join-chan', other);
     assert.ok(!chan.hasPerson(other));
     assert.ok(!other.isInChannel(chan));
 
@@ -213,26 +213,26 @@ module.exports = {
     assert.eql(mehash.host, iw.getMe().getHost());
 
     // Don't keep channels on part.
-    irc.join('#partchan', mehash);
+    irc.sendJoin('#partchan', mehash);
     iw.getChannel('#partchan');
-    irc.part('#partchan', mehash);
+    irc.sendPart('#partchan', mehash);
     assert.throws(iw.getChannel.bind(iw, '#partchan'));
 
     // Remove users on part.
-    irc.join('#partchan', mehash);
-    irc.join('#partchan', otherhash);
+    irc.sendJoin('#partchan', mehash);
+    irc.sendJoin('#partchan', otherhash);
     assert.ok(iw.getChannel('#partchan').hasPerson(other));
-    irc.part('#partchan', otherhash);
+    irc.sendPart('#partchan', otherhash);
     assert.ok(!iw.getChannel('#partchan').hasPerson(other));
 
     // Remove users on quit.
-    irc.join('#quitchan', mehash);
-    irc.join('#quitchan', otherhash);
+    irc.sendJoin('#quitchan', mehash);
+    irc.sendJoin('#quitchan', otherhash);
     assert.ok(iw.getChannel('#quitchan').hasPerson(other));
-    irc.quit('#quitchan', otherhash);
+    irc.sendQuit('#quitchan', otherhash);
     assert.ok(!iw.getChannel('#quitchan').hasPerson(other));
 
-    irc.nick(mehash, 'newnick');
+    irc.sendNick(mehash, 'newnick');
     assert.eql('newnick', iw.getMe().getNick());
 
     // Client quit should not trigger Quit event.
@@ -249,7 +249,7 @@ module.exports = {
         clientQuitTriggered = true;
       }
     });
-    irc.clientQuit(mehash);
+    irc.sendClientQuit(mehash);
     assert.ok(!quitTriggered);
     assert.ok(clientQuitTriggered);
 
@@ -259,11 +259,58 @@ module.exports = {
         assert.ok(iw === this);
       }
     });
-    irc.join("#foo", mehash);
+    irc.sendJoin("#foo", mehash);
     // And for dynamically attached raws (no _onx method).
     iw._addListener("001", function () {
       assert.ok(iw === this);
     });
     irc.send001(mehash.nick);
+  },
+  "several on connect nicks" : function (assert) {
+    var nickAttempts = [];
+    IRCMock.serverListeners = [{
+      raw : "nick",
+      callback : function (n) {
+        nickAttempts.push(n);
+      }
+    }];
+    var iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : ["nick1", "nick2", "nick3"],
+      joinChannels : ["#chan"]
+    });
+    var irc = iw.getIrc();
+    irc.sendRaw("433", "my.server", "nick1");
+    irc.sendRaw("433", "my.server", "nick2");
+    irc.send001("nick3");
+    assert.eql("nick1", nickAttempts[0].newNick);
+    assert.eql("nick2", nickAttempts[1].newNick);
+    assert.eql(3, nickAttempts.length);
+    assert.eql("nick3", iw.getMe().getNick());
+
+    // Fail to connect (not enough nicks).
+    nickAttempts = [];
+    var quitAttempt = null;
+    IRCMock.serverListeners = [{
+      raw : "nick",
+      callback : function (n) {
+        nickAttempts.push(n);
+      }
+    }, {
+      raw : "quit",
+      callback : function (n) {
+        quitAttempt = n;
+      }
+    }];
+    iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : ["nick1"],
+      joinChannels : ["#chan"]
+    });
+    irc = iw.getIrc();
+    irc.sendRaw("433", "my.server", "nick1");
+    assert.ok(quitAttempt !== null);
   }
 };
