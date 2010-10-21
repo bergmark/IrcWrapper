@@ -229,7 +229,7 @@ module.exports = {
     irc.sendJoin('#quitchan', mehash);
     irc.sendJoin('#quitchan', otherhash);
     assert.ok(iw.getChannel('#quitchan').hasPerson(other));
-    irc.sendQuit('#quitchan', otherhash);
+    irc.sendQuit(otherhash);
     assert.ok(!iw.getChannel('#quitchan').hasPerson(other));
 
     irc.sendNick(mehash, 'newnick');

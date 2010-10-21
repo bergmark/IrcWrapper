@@ -110,13 +110,10 @@ Class('IRCMock', {
         params : [location]
       });
     },
-    sendQuit : function (location, person) {
-      if (person === undefined) {
-        throw new Error("part: need to specify person.");
-      }
+    sendQuit : function (person) {
       this.sendRaw("quit", {
         person : person,
-        params : [location, "Quit message!"]
+        params : ["Quit message!"]
       });
     },
     sendClientQuit : function (person) {
