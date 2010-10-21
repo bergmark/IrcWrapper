@@ -340,5 +340,17 @@ module.exports = {
     assert.eql("my amsg", privmsgAttempts[0].message);
     assert.eql("my amsg", privmsgAttempts[1].message);
     assert.eql("#chan1,#chan2", [privmsgAttempts[0].location, privmsgAttempts[1].location].sort().join(","));
+  },
+  "IRC proxy methods" : function (assert) {
+    var iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : ["menick"],
+      joinChannels : ["#chan"]
+    });
+    assert.ok(iw.join instanceof Function);
+    assert.ok(iw.nick instanceof Function);
+    assert.ok(iw.quit instanceof Function);
+    assert.ok(iw.privmsg instanceof Function);
   }
 };
