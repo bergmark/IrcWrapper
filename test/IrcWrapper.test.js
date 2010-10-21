@@ -352,5 +352,43 @@ module.exports = {
     assert.ok(iw.nick instanceof Function);
     assert.ok(iw.quit instanceof Function);
     assert.ok(iw.privmsg instanceof Function);
+  },
+  "Merge bindings" : function (assert) {
+    var mehash = {
+      nick : "menick",
+      user : "meuser",
+      host : "mehost"
+    };
+    var otherhash = {
+      nick : 'other',
+      user : 'otheruser',
+      host : 'otherhost'
+    };
+    var callback1Triggered = false;
+    var callback2Triggered = false;
+    var iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : ["menick"],
+      joinChannels : ["#chan"],
+      bindings : [{
+        privmsg : {
+          callback : function () {
+            callback1Triggered = true;
+          }
+        }
+      }, {
+        privmsg : {
+          callback : function () {
+            callback2Triggered = true;
+          }
+        }
+      }]
+    });
+    var irc = iw.getIrc();
+    irc.sendJoin("#chan", mehash);
+    irc.sendPrivmsg("#chan", "msg", otherhash);
+    assert.ok(callback1Triggered, "Callback 1 did not trigger.");
+    assert.ok(callback2Triggered, "Callback 2 did not trigger.");
   }
 };

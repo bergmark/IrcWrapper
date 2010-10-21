@@ -85,7 +85,7 @@ Class('IRCMock', {
     },
     sendPrivmsg : function (location, message, person) {
       if (person === undefined) {
-        throw new Error("privmsg: need to specify person.");
+        throw new Error("sendPrivmsg: need to specify person.");
       }
       this.sendRaw("privmsg", {
         person : person,
@@ -94,7 +94,7 @@ Class('IRCMock', {
     },
     sendJoin : function (location, person) {
       if (person === undefined) {
-        throw new Error("join: need to specify person.");
+        throw new Error("sendJoin: need to specify person.");
       }
       this.sendRaw("join", {
         person : person,
@@ -103,7 +103,7 @@ Class('IRCMock', {
     },
     sendPart : function (location, person) {
       if (person === undefined) {
-        throw new Error("part: need to specify person.");
+        throw new Error("sendPart: need to specify person.");
       }
       this.sendRaw("part", {
         person : person,
