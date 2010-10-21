@@ -267,13 +267,6 @@ module.exports = {
     irc.send001(mehash.nick);
   },
   "several on connect nicks" : function (assert) {
-    var nickAttempts = [];
-    IRCMock.serverListeners = [{
-      raw : "nick",
-      callback : function (n) {
-        nickAttempts.push(n);
-      }
-    }];
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
@@ -284,25 +277,12 @@ module.exports = {
     irc.sendRaw("433", "my.server", "nick1");
     irc.sendRaw("433", "my.server", "nick2");
     irc.send001("nick3");
-    assert.eql("nick1", nickAttempts[0].newNick);
-    assert.eql("nick2", nickAttempts[1].newNick);
-    assert.eql(3, nickAttempts.length);
+    assert.eql("nick1", irc.getReceivedLog("nick")[0].newNick);
+    assert.eql("nick2", irc.getReceivedLog("nick")[1].newNick);
+    assert.eql(3, irc.getReceivedLog("nick").length);
     assert.eql("nick3", iw.getMe().getNick());
 
     // Fail to connect (not enough nicks).
-    nickAttempts = [];
-    var quitAttempt = null;
-    IRCMock.serverListeners = [{
-      raw : "nick",
-      callback : function (n) {
-        nickAttempts.push(n);
-      }
-    }, {
-      raw : "quit",
-      callback : function (n) {
-        quitAttempt = n;
-      }
-    }];
     iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
@@ -310,8 +290,9 @@ module.exports = {
       joinChannels : ["#chan"]
     });
     irc = iw.getIrc();
+    assert.eql(0, irc.getReceivedLog("quit").length);
     irc.sendRaw("433", "my.server", "nick1");
-    assert.ok(quitAttempt !== null);
+    assert.eql(1, irc.getReceivedLog("quit").length);
   },
   "amsg command" : function (assert) {
     var mehash = {
@@ -319,13 +300,6 @@ module.exports = {
       user : 'meuser',
       host : 'mehost'
     };
-    var privmsgAttempts = [];
-    IRCMock.serverListeners = [{
-      raw : "privmsg",
-      callback : function (n) {
-        privmsgAttempts.push(n);
-      }
-    }];
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
@@ -336,10 +310,11 @@ module.exports = {
     irc.sendJoin("#chan1", mehash);
     irc.sendJoin("#chan2", mehash);
     iw.amsg("my amsg");
-    assert.eql(2, privmsgAttempts.length);
-    assert.eql("my amsg", privmsgAttempts[0].message);
-    assert.eql("my amsg", privmsgAttempts[1].message);
-    assert.eql("#chan1,#chan2", [privmsgAttempts[0].location, privmsgAttempts[1].location].sort().join(","));
+    var recievedPms = irc.getReceivedLog("privmsg");
+    assert.eql(2, recievedPms.length);
+    assert.eql("my amsg", recievedPms[0].message);
+    assert.eql("my amsg", recievedPms[1].message);
+    assert.eql("#chan1,#chan2", [recievedPms[0].location, recievedPms[1].location].sort().join(","));
   },
   "IRC proxy methods" : function (assert) {
     var iw = new IrcWrapper({

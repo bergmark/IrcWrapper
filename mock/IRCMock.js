@@ -8,6 +8,9 @@ Class('IRCMock', {
     },
     serverListeners : {
       init : function () { return {}; }
+    },
+    receivedLog : {
+      init : function () { return {}; }
     }
   },
   methods : {
@@ -26,10 +29,16 @@ Class('IRCMock', {
       this.serverListeners[raw].push(callback);
     },
     _onServerGet : function (raw, params) {
+      this.receivedLog[raw] = this.receivedLog[raw] || [];
+      this.receivedLog[raw].push(params);
       this.serverListeners[raw] = this.serverListeners[raw] || [];
       for (var i = 0; i < this.serverListeners[raw].length; i++) {
         this.serverListeners[raw][i](params);
       }
+    },
+    getReceivedLog : function (raw) {
+      this.receivedLog[raw] = this.receivedLog[raw] || [];
+      return this.receivedLog[raw];
     },
 
     // Client to server.
@@ -65,9 +74,9 @@ Class('IRCMock', {
     sendRaw : function (raw, e) {
       for (var i = 0; i < this.listeners.length; i++) {
         var listener = this.listeners[i];
-          if (listener.raw === raw) {
-            listener.callback(e);
-          }
+        if (listener.raw === raw) {
+          listener.callback(e);
+        }
       }
     },
     // Nick already taken.
