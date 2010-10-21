@@ -312,5 +312,33 @@ module.exports = {
     irc = iw.getIrc();
     irc.sendRaw("433", "my.server", "nick1");
     assert.ok(quitAttempt !== null);
+  },
+  "amsg command" : function (assert) {
+    var mehash = {
+      nick : 'me',
+      user : 'meuser',
+      host : 'mehost'
+    };
+    var privmsgAttempts = [];
+    IRCMock.serverListeners = [{
+      raw : "privmsg",
+      callback : function (n) {
+        privmsgAttempts.push(n);
+      }
+    }];
+    var iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : [mehash.nick],
+      joinChannels : ["#chan"]
+    });
+    var irc = iw.getIrc();
+    irc.sendJoin("#chan1", mehash);
+    irc.sendJoin("#chan2", mehash);
+    iw.amsg("my amsg");
+    assert.eql(2, privmsgAttempts.length);
+    assert.eql("my amsg", privmsgAttempts[0].message);
+    assert.eql("my amsg", privmsgAttempts[1].message);
+    assert.eql("#chan1,#chan2", [privmsgAttempts[0].location, privmsgAttempts[1].location].sort().join(","));
   }
 };
