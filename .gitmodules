@@ -1,6 +1,3 @@
-[submodule "CactusJuice"]
-	path = CactusJuice
-	url = git@github.com:Raevel/CactusJuice.git
 [submodule "vendor/CactusJuice"]
 	path = vendor/CactusJuice
 	url = git@github.com:Raevel/CactusJuice.git
