@@ -40,14 +40,19 @@ Class('IRCMock', {
       this._onServerGet("privmsg", { location : location, message : message});
     },
     join : function (channel, password) {
-      console.log("join", channel);
-      this._onServerGet("join", { location : channel, password : password });
+      this._onServerGet("join", { location : channel, password : password || "" });
+    },
+    part : function (channel) {
+      this._onServerGet("part", { location : channel });
     },
     nick : function (newNick) {
       this._onServerGet("nick", { newNick : newNick });
     },
     quit : function (message) {
       this._onServerGet("quit", { message : message });
+    },
+    user : function () {
+      this._onServerGet("user", arguments);
     },
 
     // Server to client.
