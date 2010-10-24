@@ -72,6 +72,9 @@ Class('IRCMock', {
       });
     },
     sendRaw : function (raw, e) {
+      if (typeof raw !== "string") {
+        throw new Error("IRCMock: sendRaw: raw must be a string.");
+      }
       for (var i = 0; i < this.listeners.length; i++) {
         var listener = this.listeners[i];
         if (listener.raw === raw) {
@@ -87,9 +90,23 @@ Class('IRCMock', {
         params : ["*", nick, "Nickname is already in use."]
       });
     },
+    // Connect
     send001 : function (nick) {
       this.sendRaw("001", {
         params : [nick, "Welcome message!"]
+      });
+    },
+    // Names list
+    send353 : function (mehash, chan, nicks) {
+      this.sendRaw("353", {
+        servername : "server.name",
+        command : "353",
+        params : [
+          mehash.nick,
+          "=",
+          chan,
+          [mehash.nick].concat(nicks)
+        ]
       });
     },
     sendPrivmsg : function (location, message, person) {

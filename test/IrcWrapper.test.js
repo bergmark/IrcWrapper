@@ -186,7 +186,7 @@ module.exports = {
     assert.strictEqual(chan, iw.getChannel('#my-join-chan'));
 
     // Store users in channels.
-    var chan = iw.getChannel('#my-join-chan');
+    chan = iw.getChannel('#my-join-chan');
     assert.eql(2, chan.getPeopleCount());
     assert.isNotNull(chan.getPeople()[0]);
     var me = iw.getPerson('me');
@@ -265,6 +265,36 @@ module.exports = {
       assert.ok(iw === this);
     });
     irc.send001(mehash.nick);
+  },
+  "NAMES" : function (assert) {
+    var mehash = {
+      nick : 'me',
+      user : 'meuser',
+      host : 'mehost'
+    };
+    var otherhash = {
+      nick : 'other',
+      user : 'otheruser',
+      host : 'otherhost'
+    };
+
+    var iw = new IrcWrapper({
+      IRC : IRCMock,
+      server : "my.server",
+      nicks : [mehash.nick],
+      joinChannels : ["#chan"]
+    });
+
+    var irc = iw.getIrc();
+    irc.send001(mehash.nick);
+    irc.sendJoin("#chan", mehash);
+    irc.send353(mehash, "#chan", [otherhash.nick]);
+    assert.ok(iw.getPerson(otherhash.nick) instanceof Person);
+    // Several 353's can be received.
+    irc.send353(mehash, "#chan", ["foo", "bar"]);
+    iw.getPerson("foo");
+    iw.getPerson("bar");
+
   },
   "several on connect nicks" : function (assert) {
     var iw = new IrcWrapper({
