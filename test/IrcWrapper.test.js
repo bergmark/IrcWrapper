@@ -295,6 +295,7 @@ module.exports = {
     iw.getPerson("foo");
     iw.getPerson("bar");
 
+    assert.eql(4, iw.getChannel("#chan").getPeopleCount());
   },
   "several on connect nicks" : function (assert) {
     var iw = new IrcWrapper({
