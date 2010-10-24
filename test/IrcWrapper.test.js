@@ -285,10 +285,22 @@ module.exports = {
       joinChannels : ["#chan"]
     });
 
+    // Format of event listener response arg.
+    var triggered = false;
+    iw._addListener("353", function (h) {
+      if (triggered) {
+        return;
+      }
+      assert.ok(h.channel instanceof Channel);
+      assert.eql(2, h.people.length);
+      triggered = true;
+    });
+
     var irc = iw.getIrc();
     irc.send001(mehash.nick);
     irc.sendJoin("#chan", mehash);
     irc.send353(mehash, "#chan", [otherhash.nick]);
+    assert.ok(triggered);
     assert.ok(iw.getPerson(otherhash.nick) instanceof Person);
     // Several 353's can be received.
     irc.send353(mehash, "#chan", ["foo", "bar"]);
