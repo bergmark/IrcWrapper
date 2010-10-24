@@ -296,6 +296,15 @@ module.exports = {
     iw.getPerson("bar");
 
     assert.eql(4, iw.getChannel("#chan").getPeopleCount());
+
+    // Strip mode prefixes.
+    irc.send353(mehash, "#chan", ["@baz", "@+bax", "&qux"]);
+    assert.ok(iw._getPerson("@baz") === undefined, "Did not remove @ prefix");
+    assert.ok(iw._getPerson("@+baz") === undefined);
+    assert.ok(iw._getPerson("&baz") === undefined);
+    iw.getPerson("baz");
+    iw.getPerson("bax");
+    iw.getPerson("qux");
   },
   "several on connect nicks" : function (assert) {
     var iw = new IrcWrapper({
