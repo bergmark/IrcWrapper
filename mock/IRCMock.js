@@ -1,4 +1,4 @@
-require('Joose');
+require('Task/Joose/NodeJS');
 
 Class('IRCMock', {
   has : {
