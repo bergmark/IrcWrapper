@@ -105,7 +105,7 @@ Class('IRCMock', {
           mehash.nick,
           "=",
           chan,
-          [mehash.nick].concat(nicks)
+          [mehash.nick].concat(nicks).join(" ")
         ]
       });
     },
