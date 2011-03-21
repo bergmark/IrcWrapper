@@ -1,5 +1,9 @@
 require('../IrcWrapper');
 var assert = require('assert');
+var IRCMock = IrcWrapper.IRCMock;
+var IW = IrcWrapper.IrcWrapper;
+var Channel = IrcWrapper.Channel;
+var Person = IrcWrapper.Person;
 
 module.exports = {
   "event binding test" : function () {
@@ -14,7 +18,7 @@ module.exports = {
     var fooTestHash = null;
     var locationHash = null;
     var hashes = {};
-      var iw = new IrcWrapper({
+      var iw = new IrcWrapper.IrcWrapper({
         IRC : IRCMock,
         server : "irc.vassius.se",
         nicks : ["mediabot2"],
@@ -135,7 +139,7 @@ module.exports = {
       user : 'otheruser',
       host : 'otherhost'
     };
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : [mehash.nick],
@@ -170,7 +174,7 @@ module.exports = {
       host : 'otherhost'
     };
 
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : [mehash.nick],
@@ -280,7 +284,7 @@ module.exports = {
       host : 'otherhost'
     };
 
-    var iw = new IrcWrapper({
+    var iw = new IW({
       IRC : IRCMock,
       server : "my.server",
       nicks : [mehash.nick],
@@ -321,7 +325,7 @@ module.exports = {
     iw.getPerson("qux");
   },
   "several on connect nicks" : function () {
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : ["nick1", "nick2", "nick3"],
@@ -337,7 +341,7 @@ module.exports = {
     assert.eql("nick3", iw.getMe().getNick());
 
     // Fail to connect (not enough nicks).
-    iw = new IrcWrapper({
+    iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : ["nick1"],
@@ -354,7 +358,7 @@ module.exports = {
       user : 'meuser',
       host : 'mehost'
     };
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : [mehash.nick],
@@ -371,7 +375,7 @@ module.exports = {
     assert.eql("#chan1,#chan2", [recievedPms[0].location, recievedPms[1].location].sort().join(","));
   },
   "IRC proxy methods" : function () {
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : ["menick"],
@@ -395,7 +399,7 @@ module.exports = {
     };
     var callback1Triggered = false;
     var callback2Triggered = false;
-    var iw = new IrcWrapper({
+    var iw = new IrcWrapper.IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
       nicks : ["menick"],

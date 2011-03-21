@@ -4,7 +4,3 @@ require('./lib/Person');
 var adminCommands = require('./lib/adminCommands');
 require('./lib/IrcWrapper');
 require('./mock/IRCMock');
-
-module.exports = {
-  adminCommands : adminCommands
-};

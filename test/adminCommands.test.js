@@ -1,5 +1,8 @@
-var adminCommands = require('../IrcWrapper').adminCommands;
+require('../IrcWrapper');
 var assert = require('assert');
+var IRCMock = IrcWrapper.IRCMock;
+var IW = IrcWrapper.IrcWrapper;
+var adminCommands = IrcWrapper.adminCommands;
 
 module.exports = {
   test : function () {
@@ -13,7 +16,7 @@ module.exports = {
       user : "othereuser",
       host : "otherehost"
     };
-    var iw = new IrcWrapper({
+    var iw = new IW({
       IRC : IRCMock,
       server : "my.server",
       nicks : [mehash.nick],
