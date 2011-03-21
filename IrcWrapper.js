@@ -1,4 +1,4 @@
-require('./vendor/CactusJuice/CactusJuice');
+require('CactusJuice/CactusJuice');
 require('./lib/Channel');
 require('./lib/Person');
 var adminCommands = require('./lib/adminCommands');

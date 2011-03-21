@@ -1,6 +1,8 @@
 require('../IrcWrapper');
+var assert = require('assert');
+
 module.exports = {
-  "event binding test" : function (assert) {
+  "event binding test" : function () {
     var person = {
       nick : 'thenick',
       user : 'theuser',
@@ -117,7 +119,7 @@ module.exports = {
     irc.sendPart("#partchan", person);
     assert.eql("#partchan", hash.location);
   },
-  "admin privileges" : function (assert) {
+  "admin privileges" : function () {
     var mehash = {
       nick : "menick",
       user : "meuser",
@@ -156,7 +158,7 @@ module.exports = {
     assert.ok(!iw._personMatchesMask(me, "*ne*!*@*"));
     assert.ok(iw._personMatchesMask(me, "me*!me*@*host"));
   },
-  "Channel management test" : function (assert) {
+  "Channel management test" : function () {
     var mehash = {
       nick : 'me',
       user : 'meuser',
@@ -266,7 +268,7 @@ module.exports = {
     });
     irc.send001(mehash.nick);
   },
-  "NAMES" : function (assert) {
+  "NAMES" : function () {
     var mehash = {
       nick : 'me',
       user : 'meuser',
@@ -318,7 +320,7 @@ module.exports = {
     iw.getPerson("bax");
     iw.getPerson("qux");
   },
-  "several on connect nicks" : function (assert) {
+  "several on connect nicks" : function () {
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
@@ -346,7 +348,7 @@ module.exports = {
     irc.sendRaw("433", "my.server", "nick1");
     assert.eql(1, irc.getReceivedLog("quit").length);
   },
-  "amsg command" : function (assert) {
+  "amsg command" : function () {
     var mehash = {
       nick : 'me',
       user : 'meuser',
@@ -368,7 +370,7 @@ module.exports = {
     assert.eql("my amsg", recievedPms[1].message);
     assert.eql("#chan1,#chan2", [recievedPms[0].location, recievedPms[1].location].sort().join(","));
   },
-  "IRC proxy methods" : function (assert) {
+  "IRC proxy methods" : function () {
     var iw = new IrcWrapper({
       IRC : IRCMock,
       server : "my.server",
@@ -380,7 +382,7 @@ module.exports = {
     assert.ok(iw.quit instanceof Function);
     assert.ok(iw.privmsg instanceof Function);
   },
-  "Merge bindings" : function (assert) {
+  "Merge bindings" : function () {
     var mehash = {
       nick : "menick",
       user : "meuser",

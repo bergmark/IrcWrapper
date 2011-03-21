@@ -1,7 +1,8 @@
 var adminCommands = require('../IrcWrapper').adminCommands;
+var assert = require('assert');
 
 module.exports = {
-  test : function (assert) {
+  test : function () {
     var mehash = {
       nick : "menick",
       user : "meuser",

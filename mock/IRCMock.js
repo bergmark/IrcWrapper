@@ -1,5 +1,3 @@
-require('Task/Joose/NodeJS');
-
 Class('IRCMock', {
   has : {
     listeners : {
